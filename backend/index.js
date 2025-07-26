@@ -3,8 +3,11 @@ const app = express();
 const { DBConnection } = require("./database/db");
 const User = require("./models/User");
 const bcrypt = require("bcryptjs");
-
+const jwt=require("jsonwebtoken");
 DBConnection();
+
+app.use(express.json());
+app.use(express.urlencoded({ extended: true}));
 app.get("/", (req, res) => {
   res.send("hello,world!");
 });
@@ -31,12 +34,11 @@ app.post("/register", async (req, res) => {
     password: hashedPassword,
   });
 
-  const token=JsonWebTokenError.sign({id: user._id,email},process.env.SECRET_KEY,{
-    expireIn: '1h',
+  const token=jwt.sign({id: user._id,email},process.env.SECRET_KEY,{
+    expiresIn: '1h',
   })
 
   user.token=token;
-  user.password=undefined;
   res.status(200).json({ message: 'you have successfully registered',user});
  } catch (error) {
     console.log(error);
